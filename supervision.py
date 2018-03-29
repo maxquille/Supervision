@@ -145,6 +145,9 @@ def main_loop(log):
 	
 	os.system("echo " + alarm_sous_surveillance + " > " + path_alarm_sous_surveillance)
 	os.system("echo " + alarm_actif + " > " + path_alarm_actif)
+	os.system("sudo chown pi " + path_alarm_sous_surveillance)	
+	os.system("sudo chown pi " + path_alarm_actif)	
+
 	
 	# Wait during if up
 	if_wlan0_up = False
