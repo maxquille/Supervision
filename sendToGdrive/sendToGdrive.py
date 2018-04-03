@@ -38,8 +38,8 @@ logger_path = "/home/pi/supervision/logs/sendToGdrive.log"
 
 param_file = "/home/pi/supervision/param.ini"
 
-path_alarm_actif = "/tmp/alarm_actif.txt"
-alarm_actif = "on"
+path_alarm_local_actif = "/tmp/alarm_local_actif.txt"
+alarm_local_actif = "on"
 
 """ Create logger class """
 class logger(object):
@@ -194,7 +194,7 @@ def main():
 	log.info("   number_event: " + number_event)
 	
 	# Alarm Actif
-	os.system("echo " + alarm_actif + " > " + path_alarm_actif)
+	os.system("echo " + alarm_local_actif + " > " + path_alarm_local_actif)
 			
 	time.sleep(5)
 	# Upload the files    

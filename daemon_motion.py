@@ -22,6 +22,7 @@ import select
 
 work_path = "/home/pi/supervision/"
 logger_path = "/home/pi/supervision/logs/daemon_motion.log"
+path_alarm_local_actif = "/tmp/alarm_local_actif.txt"
 
 name_came = 'cam'
 ip_cam = None
@@ -102,13 +103,11 @@ def retrieve_parameters(log, file):
 		fconfig = ConfigParser.ConfigParser()
 		fconfig.read(path_file)
 		ip_cam = fconfig.get('Ip_cam', 'ip_static').strip()
-		# For debug
-		#ip_cam = "10.0.0.101"
 		
 		section = 'Supervision'
 		path_items = fconfig.items(section)
 		for key, path in path_items:
-			if "ipcam_slave" in key:
+			if ("ipcam_slave" in key) or ("ipcam_master" in key):
 				if path.split("/")[1].strip() == ip_cam:
 					port_cam = int(path.split("/")[2].strip())
 					return
@@ -132,6 +131,7 @@ def main_loop(log):
 	global alarm_sous_surveillance
 	global ip_cam
 	global port_cam
+	alarm_local_actif = "off"
 	
 	# Kill motion process
 	os.system("sudo killall motion")
@@ -143,7 +143,9 @@ def main_loop(log):
 	log.info("Start Motion process")
 	time.sleep(2)
 	
-
+	os.system("echo " + alarm_local_actif + " > " + path_alarm_local_actif)
+	os.system("sudo chown pi " + path_alarm_local_actif)	
+	
 	while True:
 		try:
 			urllib2.urlopen('http://127.0.0.1:8082/0/detection/pause')
@@ -158,6 +160,8 @@ def main_loop(log):
 	udp_frame_from_master_InTimeout = None
 	
 	while True:
+	
+		""" Receive socket from master """
 		""" Bind socket """
 		try:
 			sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) # UDP
@@ -198,8 +202,24 @@ def main_loop(log):
 				
 			udp_frame_from_master_InTimeout = True
 		
-	
 		
+		""" Send socket to master """
+		if udp_frame_from_master_InTimeout != True:
+			""" Bind socket """
+			sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) # UDP
+			
+			""" Read from file """
+			alarm_local_actif = open(path_alarm_local_actif, 'r').read().rstrip()
+		
+			""" Send UDP frame to master """
+			payload = 0x0
+			if alarm_local_actif == "on":
+				mask = 1
+				payload |= mask					
+			
+			hex = struct.pack("B", payload)
+			#sock.sendto(hex, (defCamSupervSlave[slave]['ip'], int(defCamSupervSlave[slave]['port'])))
+			
 	sys.exit()
 
 def main():

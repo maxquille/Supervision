@@ -26,14 +26,14 @@ import netifaces as ni
 work_path = "/home/pi/supervision/"
 logger_path = "/home/pi/supervision/logs/supervision.log"
 path_alarm_sous_surveillance = "/tmp/alarm_sous_surveillance.txt"
-path_alarm_actif = "/tmp/alarm_actif.txt"
+path_alarm_general_actif = "/tmp/alarm_genaral_actif.txt"
 
 defIpCam = defaultdict(list)
 defCamSupervSlave = defaultdict(list)
 
 cam_IsMaster = False
 alarm_sous_surveillance = "off"
-alarm_actif = "off"
+alarm_general_actif = "off"
 interface = "wlan0"
 
 """ Create logger class """
@@ -104,13 +104,15 @@ def retrieve_parameters(log, file):
 		section = 'Supervision'
 		cam_IsMaster = fconfig.getboolean(section, 'cam_IsMaster')
 		path_items = fconfig.items(section)
+
 		for key, path in path_items:
-			if "ipcam_slave" in key:
+			if ("ipcam_slave" in key) or ("ipcam_master" in key):
 				defCamSupervSlave[key] = {}
 				defCamSupervSlave[key]['name'] = path.split("/")[0].strip()
 				defCamSupervSlave[key]['ip'] = path.split("/")[1].strip()
 				defCamSupervSlave[key]['port'] = path.split("/")[2].strip()
 				defCamSupervSlave[key]['isAlive'] = False
+
 		return
 
 	except Exception as e:
@@ -140,13 +142,13 @@ def toggle_alarm_surv():
 	
 def main_loop(log):
 	global alarm_sous_surveillance
-	global alarm_actif
+	global alarm_general_actif
 	global interface
 	
 	os.system("echo " + alarm_sous_surveillance + " > " + path_alarm_sous_surveillance)
-	os.system("echo " + alarm_actif + " > " + path_alarm_actif)
+	os.system("echo " + alarm_general_actif + " > " + path_alarm_general_actif)
 	os.system("sudo chown pi " + path_alarm_sous_surveillance)	
-	os.system("sudo chown pi " + path_alarm_actif)	
+	os.system("sudo chown pi " + path_alarm_general_actif)	
 
 	
 	# Wait during if up
@@ -179,7 +181,7 @@ def main_loop(log):
 		
 		""" Read from file """
 		alarm_sous_surveillance = open(path_alarm_sous_surveillance, 'r').read().rstrip()
-		alarm_actif = open(path_alarm_actif, 'r').read().rstrip()
+		alarm_general_actif = open(path_alarm_general_actif, 'r').read().rstrip()
 
 		""" Wait UDP from slave """
 		""" Bind socket """
@@ -190,7 +192,7 @@ def main_loop(log):
 			mask = 1
 			payload |= mask
 			
-		if alarm_actif == "on":
+		if alarm_general_actif == "on":
 			mask = 1 << 1
 			payload |= mask
 				
