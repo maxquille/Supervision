@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<!--Registry file for ExtraPuTTY, Copyright 2011-->
+<ExtraPuTTYTreeCmd>
+	<Position name="ExtraPuTTY" use="0">
+  		<btlr name="bottom" value="0"/>
+  		<btlr name="top" value="0"/>
+  		<btlr name="left" value="0"/>
+  		<btlr name="right" value="0"/>
+	</Position>
+	<Position name="PuTTY" use="0">
+  		<btlr name="bottom" value="0"/>
+  		<btlr name="top" value="0"/>
+  		<btlr name="left" value="0"/>
+  		<btlr name="right" value="0"/>
+	</Position>
+	<Options Locked="0"/>
+	<root name="Pi" RGB="16711680" lfHeight="-12" lfWidth="0" lfEscapement="0" lfOrientation="0" lfWeight="700" lfItalic="255" lfUnderline="1" lfStrikeOut="0" lfCharSet="0" lfOutPrecision="3" lfClipPrecision="2" lfQuality="1" lfPitchAndFamily="34" lfFaceName="Arial">
+  		<childroot name="Login" type="2" loop="1" auto="0" RGB="128" lfHeight="-12" lfWidth="0" lfEscapement="0" lfOrientation="0" lfWeight="700" lfItalic="255" lfUnderline="0" lfStrikeOut="0" lfCharSet="0" lfOutPrecision="3" lfClipPrecision="2" lfQuality="1" lfPitchAndFamily="34" lfFaceName="Arial">
+      			<childscenarii name="login" cmd="pi" tempo="1000" mode="execute" CRLF="1" RGB="0" lfHeight="-12" lfWidth="0" lfEscapement="0" lfOrientation="0" lfWeight="400" lfItalic="0" lfUnderline="0" lfStrikeOut="0" lfCharSet="0" lfOutPrecision="3" lfClipPrecision="2" lfQuality="1" lfPitchAndFamily="34" lfFaceName="Arial"/>
+      			<childscenarii name="pwd" cmd="Lolokey2019!" tempo="1000" mode="execute" CRLF="1" RGB="0" lfHeight="-12" lfWidth="0" lfEscapement="0" lfOrientation="0" lfWeight="400" lfItalic="0" lfUnderline="0" lfStrikeOut="0" lfCharSet="0" lfOutPrecision="3" lfClipPrecision="2" lfQuality="1" lfPitchAndFamily="34" lfFaceName="Arial"/>
+  		</childroot>
+  		<childroot name="Restart supervision" type="2" loop="1" auto="0" RGB="128" lfHeight="-12" lfWidth="0" lfEscapement="0" lfOrientation="0" lfWeight="700" lfItalic="255" lfUnderline="0" lfStrikeOut="0" lfCharSet="0" lfOutPrecision="3" lfClipPrecision="2" lfQuality="1" lfPitchAndFamily="34" lfFaceName="Arial">
+      			<childscenarii name="kill python" cmd="sudo killall python" tempo="1000" mode="execute" CRLF="1" RGB="0" lfHeight="-12" lfWidth="0" lfEscapement="0" lfOrientation="0" lfWeight="400" lfItalic="0" lfUnderline="0" lfStrikeOut="0" lfCharSet="0" lfOutPrecision="3" lfClipPrecision="2" lfQuality="1" lfPitchAndFamily="34" lfFaceName="Arial"/>
+      			<childscenarii name="run supervision.py" cmd="sudo /usr/bin/python /home/pi/supervision/supervision.py -p /home/pi/supervision/param.ini &amp;" tempo="1000" mode="execute" CRLF="1" RGB="0" lfHeight="-12" lfWidth="0" lfEscapement="0" lfOrientation="0" lfWeight="400" lfItalic="0" lfUnderline="0" lfStrikeOut="0" lfCharSet="0" lfOutPrecision="3" lfClipPrecision="2" lfQuality="1" lfPitchAndFamily="34" lfFaceName="Arial"/>
+  		</childroot>
+  		<childroot name="Git : push master" type="1" cmd="cd /home/pi/supervision; git push -u origin master" CRLF="1" RGB="0" lfHeight="-12" lfWidth="0" lfEscapement="0" lfOrientation="0" lfWeight="400" lfItalic="0" lfUnderline="0" lfStrikeOut="0" lfCharSet="0" lfOutPrecision="3" lfClipPrecision="2" lfQuality="1" lfPitchAndFamily="34" lfFaceName="Arial"/>
+  		<childroot name="Git : push develop" type="1" cmd="cd /home/pi/supervision; git push -u origin develop" CRLF="1" RGB="0" lfHeight="-12" lfWidth="0" lfEscapement="0" lfOrientation="0" lfWeight="400" lfItalic="0" lfUnderline="0" lfStrikeOut="0" lfCharSet="0" lfOutPrecision="3" lfClipPrecision="2" lfQuality="1" lfPitchAndFamily="34" lfFaceName="Arial"/>
+  		<childroot name="Git : login" type="1" cmd="maxquille" CRLF="1" RGB="0" lfHeight="-12" lfWidth="0" lfEscapement="0" lfOrientation="0" lfWeight="400" lfItalic="0" lfUnderline="0" lfStrikeOut="0" lfCharSet="0" lfOutPrecision="3" lfClipPrecision="2" lfQuality="1" lfPitchAndFamily="34" lfFaceName="Arial"/>
+  		<childroot name="Git : pwd" type="1" cmd="musique2520" CRLF="1" RGB="0" lfHeight="-12" lfWidth="0" lfEscapement="0" lfOrientation="0" lfWeight="400" lfItalic="0" lfUnderline="0" lfStrikeOut="0" lfCharSet="0" lfOutPrecision="3" lfClipPrecision="2" lfQuality="1" lfPitchAndFamily="34" lfFaceName="Arial"/>
+		<childroot name="Send SMS" type="1" cmd="wget 'https://smsapi.free-mobile.fr/sendmsg?user=36056523&pass=Pn77qalc2rwilN&msg=LOOOOOOOL'" CRLF="1" RGB="0" lfHeight="-12" lfWidth="0" lfEscapement="0" lfOrientation="0" lfWeight="400" lfItalic="0" lfUnderline="0" lfStrikeOut="0" lfCharSet="0" lfOutPrecision="3" lfClipPrecision="2" lfQuality="1" lfPitchAndFamily="34" lfFaceName="Arial"/>
+	</root>
+</ExtraPuTTYTreeCmd>
