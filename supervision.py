@@ -166,7 +166,9 @@ def main_loop(log):
 		
 	""" Bind socket """
 	sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) # UDP
-	
+	sock2 = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) # UDP
+	sock2.bind((defIpCam['ip_static'], 50001))
+		
 	while True:
 		""" Read if toggle alarm_sous_surveillance is required """
 		if toggle_alarm_surv():
@@ -183,9 +185,6 @@ def main_loop(log):
 		alarm_sous_surveillance = open(path_alarm_sous_surveillance, 'r').read().rstrip()
 		alarm_general_actif = open(path_alarm_general_actif, 'r').read().rstrip()
 
-		""" Wait UDP from slave """
-		""" Bind socket """
-	
 		""" Send UDP frame to slave """
 		payload = 0x00
 		if alarm_sous_surveillance == "on":
@@ -200,7 +199,12 @@ def main_loop(log):
 		for slave in defCamSupervSlave:
 			hex = struct.pack("B", payload)
 			sock.sendto(hex, (defCamSupervSlave[slave]['ip'], int(defCamSupervSlave[slave]['port'])))
-
+		
+		""" Wait UDP from slave """
+		""" Bind socket """
+		print 'reception'
+		print sock2.recv(2048)
+		
 		time.sleep(1)
 
 def main():

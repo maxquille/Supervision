@@ -31,7 +31,7 @@ from subprocess import *
 from threading import Timer
 from argparse import ArgumentParser
 import subprocess, threading,signal
-
+import pygame
 work_path = "/home/pi/supervision/sendToGdrive"
 
 logger_path = "/home/pi/supervision/logs/sendToGdrive.log"
@@ -193,10 +193,16 @@ def main():
 	#log.info("   dst_folder_name: " + dst_folder_name)
 	log.info("   number_event: " + number_event)
 	
+	# Send SMS
+	os.system("wget 'https://smsapi.free-mobile.fr/sendmsg?user=36056523&pass=Pn77qalc2rwilN&msg=Alerte%20general%20!!!'")
+	pygame.mixer.init()
+	pygame.mixer.music.load("/home/pi/supervision/music/2334.mp3")
+	pygame.mixer.music.play()	
 	# Alarm Actif
 	os.system("echo " + alarm_local_actif + " > " + path_alarm_local_actif)
 			
 	time.sleep(5)
+	pygame.mixer.music.stop()	
 	# Upload the files    
 	upload_files(log, src_folder_name, number_event)
 

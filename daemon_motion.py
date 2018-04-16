@@ -27,6 +27,8 @@ path_alarm_local_actif = "/tmp/alarm_local_actif.txt"
 name_came = 'cam'
 ip_cam = None
 port_cam = None
+ip_cam_master = None
+port_cam_master = None
 
 alarm_sous_surveillance = "off"
 
@@ -89,6 +91,9 @@ def get_cam_name(log, path_file):
 def retrieve_parameters(log, file):
 	global ip_cam
 	global port_cam
+	global ip_cam_master
+	global port_cam_master
+	
 	file_backup = 'param_backup.ini'
 	path_file = file
 	
@@ -105,19 +110,25 @@ def retrieve_parameters(log, file):
 		ip_cam = fconfig.get('Ip_cam', 'ip_static').strip()
 		
 		section = 'Supervision'
+		
+		ip_cam_master = fconfig.get(section, 'ipcam_master').strip().split("/")[1].strip()
+		port_cam_master = fconfig.get(section, 'ipcam_master').strip().split("/")[3].strip()
+		
 		path_items = fconfig.items(section)
 		for key, path in path_items:
 			if ("ipcam_slave" in key) or ("ipcam_master" in key):
 				if path.split("/")[1].strip() == ip_cam:
 					port_cam = int(path.split("/")[2].strip())
 					return
-				
+		
 		log.error("Impossible to find camera port in parameter file")
 		sys.exit()
 		
 	except Exception as e:
 		log.error("Parameter file is incorrect: " + str(e))
 		sys.exit()
+	
+	
 
 def start_stop_detection(log,state):
 	if state == "off":
@@ -131,6 +142,8 @@ def main_loop(log):
 	global alarm_sous_surveillance
 	global ip_cam
 	global port_cam
+	global ip_cam_master
+	global port_cam_master
 	alarm_local_actif = "off"
 	
 	# Kill motion process
@@ -204,21 +217,23 @@ def main_loop(log):
 		
 		
 		""" Send socket to master """
-		if udp_frame_from_master_InTimeout != True:
-			""" Bind socket """
-			sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) # UDP
-			
-			""" Read from file """
-			alarm_local_actif = open(path_alarm_local_actif, 'r').read().rstrip()
+		#if udp_frame_from_master_InTimeout != True:
+		""" Bind socket """
+		sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) # UDP
 		
-			""" Send UDP frame to master """
-			payload = 0x0
-			if alarm_local_actif == "on":
-				mask = 1
-				payload |= mask					
+		""" Read from file """
+		alarm_local_actif = open(path_alarm_local_actif, 'r').read().rstrip()
+	
+		""" Send UDP frame to master """
+		payload = 0x0
+		if alarm_local_actif == "on":
+			mask = 1
+			payload |= mask					
+		
+		hex = struct.pack("B", payload)
+		print 'envoie'
+		sock.sendto(hex, (ip_cam_master, int(port_cam_master)))
 			
-			hex = struct.pack("B", payload)
-			#sock.sendto(hex, (defCamSupervSlave[slave]['ip'], int(defCamSupervSlave[slave]['port'])))
 			
 	sys.exit()
 
