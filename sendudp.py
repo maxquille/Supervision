@@ -28,11 +28,10 @@ sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) # UDP
 
 """ Send UDP frame to slave """
 payload = 0x00
-
-payload = 0x5
-		
+	
 
 while True:
+	payload = int(open('/tmp/payload.txt', 'r').read().rstrip())
 	hex = struct.pack("B", payload)
 	sock.sendto(hex, ('192.168.1.100', 50001))
 	time.sleep(1)
