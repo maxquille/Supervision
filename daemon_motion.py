@@ -21,6 +21,8 @@ from argparse import ArgumentParser
 import socket, struct
 import select
 from datetime import date, datetime, timedelta
+import pygame
+import RPi.GPIO as GPIO ## Import GPIO library
 
 logger_path = "/home/pi/supervision/logs/daemon_motion.log"
 path_motion_event = "/tmp/motion_event.txt"
@@ -266,30 +268,63 @@ class alarme(Thread):
 		self.log.info("Start thread alarme")
 		self.date_start = datetime.now()
 		self.date_end = datetime.now()
-
+		self.alarme_is_actif = False
+		pygame.mixer.init()
+		pygame.mixer.music.load("/home/pi/supervision/music/2334.mp3")
+		GPIO.setwarnings(False)
+		GPIO.setmode(GPIO.BOARD) ## Use board pin numbering
+		GPIO.setup(7, GPIO.OUT) ## Setup GPIO Pin 7 to OUT
+		GPIO.output(7,True) ## Turn on GPIO pin 7
+		self.gpio_state = True
+		
 	def run(self):
+	
 		while True:
-			time.sleep(1)
-
-			if self.current_status == 'on' and datetime.now() > self.date_end:
-				print("va p e falloir penser a arreter")
+			time.sleep(0.4)
+			
+			#Timeout
+			if self.current_status == 'on' and datetime.now() > self.date_end and self.alarme_is_actif == True:
+				self.alarme_is_actif = False
+				pygame.mixer.music.stop()
+				self.log.info('Thread alarme: Stop alarme after timeout.')
+			
+			self.manage_gpio()
+			
+			
 				
 	def set(self):
 		self.current_status = 'on'
+		self.alarme_is_actif = True
 		self.date_start = datetime.now()
-		self.date_end = self.date_start + + timedelta(minutes=0, seconds=15)
+		self.date_end = self.date_start + + timedelta(minutes=0, seconds=10)
+		# Play alarm music
+		pygame.mixer.music.play()
 		return
 		
 	def clear(self):
 		open(path_motion_event, 'w').write("off\n")
 		self.current_status = 'off'
+		self.alarme_is_actif = False
 		self.date_start = datetime.now()
 		self.date_end = datetime.now()
+		# Stop alarm music
+		pygame.mixer.music.stop()
 		return
 	
 	def get_status(self):
 		return self.current_status
 
+	def manage_gpio(self):
+		if self.alarme_is_actif == True:
+			if self.gpio_state == True:
+				GPIO.output(7,False) ## Turn off
+				self.gpio_state = False
+			else:
+				GPIO.output(7,True) ## Turn ons
+				self.gpio_state = True
+		else:
+			GPIO.output(7,True) ## Turn on
+		
 def main():
 	
 	""" Create logger """
@@ -355,25 +390,25 @@ def main():
 		
 		if t_r_udp.get_alarme_active_cmd() == 'off' and t_motion.get_on_event_detection() == 'off' and current_alarme_status == 'on':
 			t_alarme.clear()
-			current_alarme_status = t_alarme.get_status()
+			current_alarme_status = 'off'
 			t_s_udp.set_alarme_active_status(current_alarme_status)
 			log.info("Alarme_active_status new state : " + current_alarme_status)
 		
 		if current_detection_status == 'off' and current_alarme_status == 'on':
 			t_alarme.clear()
-			current_alarme_status = t_alarme.get_status()
+			current_alarme_status = 'off'
 			t_s_udp.set_alarme_active_status(current_alarme_status)
 			log.info("Alarme_active_status new state : " + current_alarme_status)
 
 		if current_detection_status == 'on' and t_r_udp.get_alarme_active_cmd() == 'on' and current_alarme_status == 'off':
 			t_alarme.set()
-			current_alarme_status = t_alarme.get_status()
+			current_alarme_status = 'on'
 			t_s_udp.set_alarme_active_status(current_alarme_status)
 			log.info("Alarme_active_status new state : " + current_alarme_status)
 
 		if current_detection_status == 'on' and t_motion.get_on_event_detection() == 'on' and current_alarme_status == 'off':
 			t_alarme.set()
-			current_alarme_status = t_alarme.get_status()
+			current_alarme_status = 'on'
 			t_s_udp.set_alarme_active_status(current_alarme_status)
 			log.info("Alarme_active_status new state : " + current_alarme_status)
 		
