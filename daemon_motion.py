@@ -27,6 +27,8 @@ import RPi.GPIO as GPIO ## Import GPIO library
 logger_path = "/home/pi/supervision/logs/daemon_motion.log"
 path_motion_event = "/tmp/motion_event.txt"
 param_file_name = "param.ini"
+motion_conf_path_original = "/etc/motion/motion_original.conf"
+motion_conf_path = "/etc/motion/motion.conf"
 
 """ Global def """
 def retrieve_parameters(log, file):
@@ -270,7 +272,10 @@ class alarme(Thread):
 		self.date_end = datetime.now()
 		self.alarme_is_actif = False
 		pygame.mixer.init()
-		pygame.mixer.music.load("/home/pi/supervision/music/2334.mp3")
+		try:
+			pygame.mixer.music.load("/home/pi/supervision/music/2334.mp3")
+		except:
+			log.error("Thread alarme: Load music failed")
 		GPIO.setwarnings(False)
 		GPIO.setmode(GPIO.BOARD) ## Use board pin numbering
 		GPIO.setup(7, GPIO.OUT) ## Setup GPIO Pin 7 to OUT
@@ -298,17 +303,24 @@ class alarme(Thread):
 		self.date_start = datetime.now()
 		self.date_end = self.date_start + + timedelta(minutes=0, seconds=10)
 		# Play alarm music
-		pygame.mixer.music.play()
+		try:
+			pygame.mixer.music.play()
+		except:
+			pass
+		
 		return
 		
 	def clear(self):
-		open(path_motion_event, 'w').write("off\n")
+		open(path_motion_event, 'w').write("off")
 		self.current_status = 'off'
 		self.alarme_is_actif = False
 		self.date_start = datetime.now()
 		self.date_end = datetime.now()
 		# Stop alarm music
-		pygame.mixer.music.stop()
+		try:
+			pygame.mixer.music.stop()
+		except:
+			pass
 		return
 	
 	def get_status(self):
@@ -331,8 +343,9 @@ def main():
 	log = logger()
 	log.create()
 	log.info("")
+	log.info("Start script")
 	
-	open(path_motion_event, 'w').write("off\n")
+	open(path_motion_event, 'w').write("off")
 	
 	""" Global variables """
 	name_came = None
@@ -361,6 +374,14 @@ def main():
 	time.sleep(2)
 	
 	# Start motion process
+	try:
+		file = open(motion_conf_path_original,'r').read().replace("$CAM$",name_came)
+		open(motion_conf_path,'w').write(file)
+		
+	except Exception as e:
+		log.error("Impossible to create motion.conf : " + str(e))
+		sys.exit()
+	
 	os.system("sudo motion >/dev/null 2>&1")
 	log.info("Start Motion process")
 	t_motion.clear_detection()

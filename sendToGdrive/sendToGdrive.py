@@ -20,7 +20,6 @@
 from __future__ import (unicode_literals, absolute_import, print_function,
                         division)
 
-	
 """ Import general libraries"""
 import time, sys, logging, os, ast, ConfigParser, io
 from os import chdir, listdir, stat
@@ -32,14 +31,14 @@ from threading import Timer
 from argparse import ArgumentParser
 import subprocess, threading,signal
 import pygame
+from threading import Thread
+path_motion_event = "/tmp/motion_event.txt"
+
+
 work_path = "/home/pi/supervision/sendToGdrive"
-
 logger_path = "/home/pi/supervision/logs/sendToGdrive.log"
+param_file_path = "/home/pi/supervision/param.ini"
 
-param_file = "/home/pi/supervision/param.ini"
-
-path_alarm_local_actif = "/tmp/alarm_local_actif.txt"
-alarm_local_actif = "on"
 
 """ Create logger class """
 class logger(object):
@@ -47,12 +46,9 @@ class logger(object):
 		self.log = logging.getLogger(__name__) 
 	
 	def create(self):
-		""" Logger path """ 
-		self.pathlogger = logger_path
-
 		""" Logger setting """
 		self.log.setLevel(logging.DEBUG)
-		self.file_handler = RotatingFileHandler(os.path.normpath(self.pathlogger), 'a', 1000000, 1)
+		self.file_handler = RotatingFileHandler(os.path.normpath(logger_path), 'a', 1000000, 1)
 		self.formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
 		self.file_handler.setLevel(logging.DEBUG)
 		self.file_handler.setFormatter(self.formatter)
@@ -74,23 +70,186 @@ class logger(object):
 	def debug(self, string):
 		self.log.debug(string)	
 
-def parse_args():
-	""" 
-	Parse arguments
-	"""
 
-	parser = ArgumentParser(
-		description="Upload local folder to Google Drive")
-	parser.add_argument('-s', '--source', type=str, 
-						help='Folder to upload')
-	#parser.add_argument('-d', '--destination', type=str, 
-	#					help='Destination Folder in Google Drive')
-	#parser.add_argument('-p', '--parent', type=str, 
-	#					help='Parent Folder in Google Drive')
-	parser.add_argument('-n', '--number', type=str, 
-						help='Event detection number')
-						
-	return parser.parse_args()
+""" Global def """
+def retrieve_parameters(log, file):
+	name_came = None
+
+	try:
+		with open(file): pass
+	except:
+		log.error("Parameter file is missing : " + file)
+		sys.exit()
+
+	try:
+		fconfig = ConfigParser.ConfigParser()
+		fconfig.read(file)
+		
+		name_came = fconfig.get('General', 'camera_name').strip()
+		ip_cam = fconfig.get('Ip_cam', 'ip_static').strip()
+
+		section = 'Supervision'
+		ip_cam_master = fconfig.get(section, 'ipcam_master').strip().split("/")[0].strip()
+		port_cam_master = fconfig.get(section, 'ipcam_master').strip().split("/")[1].strip()
+
+		path_items = fconfig.items(section)
+		for key, path in path_items:
+			if ("ipcam_slave" in key) or ("ipcam_master" in key):
+				if path.split("/")[0].strip() == ip_cam:
+					if ("ipcam_master" in key):
+						port_cam = int(path.split("/")[2].strip())
+					else:
+						port_cam = int(path.split("/")[1].strip())
+	
+					return name_came, ip_cam, port_cam, ip_cam_master, port_cam_master
+		
+		log.error("Impossible to find camera port in parameter file")
+		sys.exit()
+		
+	except Exception as e:
+		log.error("Parameter file is incorrect: " + str(e))
+		sys.exit()
+
+class event(Thread):
+
+	def __init__(self, log):
+		Thread.__init__(self)
+		self.log = log
+		self.log.info("Start thread event")
+		
+	def run(self):
+		pass
+		
+	def send_sms(self):
+		pass
+		
+	def send_mail(self):
+		pass
+		
+	def upload_file(self): 
+		pass
+	
+
+def main():
+	""" 
+		Main
+	"""
+	
+	""" Global variables """
+	name_came = None
+	
+	""" Create logger """
+	log = logger()
+	log.create()
+	log.info("")
+	log.info("Start script")
+	
+	th_event = event(log)
+	th_event.start()
+	
+	# Set alarme
+	os.system('sleep 15 && echo "on" > ' + path_motion_event)
+	
+	sys.exit()
+	
+	# Send SMS
+	os.system("wget 'https://smsapi.free-mobile.fr/sendmsg?user=36056523&pass=Pn77qalc2rwilN&msg=Alerte%20general%20!!!'")
+	
+	
+	# Upload files to Gdrive
+	upload_files(log, src_folder_name, number_event)
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	""" Retrieve parameter """
+	name_came = retrieve_parameters(log, param_file_path)
+	
+	""" Script argument """
+	if len(sys.argv) != 5:
+		log.error("Error, argument not valid")
+		sys.exit()
+
+	args = parse_args()
+	src_folder_name = args.source
+	#dst_folder_name = args.destination
+	#parent_folder_name = args.parent
+	number_event = args.number
+	
+	log.info("Arguments: ")
+	log.info("   src_folder_name: " + src_folder_name)
+	#log.info("   parent_folder_name: " + parent_folder_name)
+	#log.info("   dst_folder_name: " + dst_folder_name)
+	log.info("   number_event: " + number_event)
+	
+	# Send SMS
+	os.system("wget 'https://smsapi.free-mobile.fr/sendmsg?user=36056523&pass=Pn77qalc2rwilN&msg=Alerte%20general%20!!!'")
+	pygame.mixer.init()
+	pygame.mixer.music.load("/home/pi/supervision/music/2334.mp3")
+	pygame.mixer.music.play()	
+	# Alarm Actif
+	os.system("echo " + alarm_local_actif + " > " + path_alarm_local_actif)
+			
+	time.sleep(5)
+	pygame.mixer.music.stop()	
+	# Upload the files    
+	upload_files(log, src_folder_name, number_event)
+
+	sys.exit()
+	
+if __name__ == "__main__":
+    main()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+path_alarm_local_actif = "/tmp/alarm_local_actif.txt"
+alarm_local_actif = "on"
+
+
 
 class Command(object):
 	def __init__(self, cmd):
@@ -127,6 +286,7 @@ def upload_files(log, src_folder_name, nbr):
 	except OSError:
 		log.error('Local folder ' + src_folder_name + ' is missing')
 		sys.exit()
+	
 	
 	up_to_date = False
 	nb_try_uploading = 3
