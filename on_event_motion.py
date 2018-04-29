@@ -80,12 +80,12 @@ class class_event(object):
 		self.event_number = event
 		
 	def send_sms(self):
-		os.system("curl 'https://smsapi.free-mobile.fr/sendmsg?user=36056523&pass=Pn77qalc2rwilN&msg=Detection%20camera%20sur%20"+ self.cam_name +"!' >/dev/null 2>&1 &")
+		os.system("curl 'https://smsapi.free-mobile.fr/sendmsg?user=36056523&pass=Pn77qalc2rwilN&msg=Detection%20camera%20sur%20"+ self.cam_name +"%20!' >/dev/null 2>&1 &")
 		#sself.log.info("class_event: send SMS")
 		
 	def send_mail(self):
 		self.log.info("class_event: send Mail")
-		os.system('(echo "Alerte" | mail -s "Detection camera sur ' + self.cam_name + '!" mquille.supervision@gmail.com)&')
+		os.system('(echo "Alerte" | mail -s "Detection camera sur ' + self.cam_name + ' !" mquille.supervision@gmail.com)&')
 		
 	def upload_file(self):
 		self.log.info("class_event: upload pictures to GoogleDrive")

@@ -301,10 +301,10 @@ class alarme(Thread):
 		self.current_status = 'on'
 		self.alarme_is_actif = True
 		self.date_start = datetime.now()
-		self.date_end = self.date_start + + timedelta(minutes=0, seconds=10)
+		self.date_end = self.date_start + + timedelta(minutes=0, seconds=45) #Timeout
 		# Play alarm music
 		try:
-			pygame.mixer.music.play()
+			pygame.mixer.music.play(loops=-1, start=0.0)
 		except:
 			pass
 		
