@@ -36,11 +36,6 @@ from threading import Thread
 path_motion_event = "/tmp/motion_event.txt"
 logger_path = "/home/pi/supervision/logs/on_event_motion.log"
 
-work_path = "/home/pi/supervision/sendToGdrive"
-
-param_file_path = "/home/pi/supervision/param.ini"
-
-
 """ Create logger class """
 class logger(object):
 	def __init__(self):
@@ -80,12 +75,12 @@ class class_event(object):
 		self.event_number = event
 		
 	def send_sms(self):
-		os.system("curl 'https://smsapi.free-mobile.fr/sendmsg?user=36056523&pass=Pn77qalc2rwilN&msg=Detection%20camera%20sur%20"+ self.cam_name +"%20!' >/dev/null 2>&1 &")
+		os.system("curl 'https://smsapi.free-mobile.fr/sendmsg?user=36056523&pass=Pn77qalc2rwilN&msg=Detection%20mouvement%20sur%20"+ self.cam_name +"%20!' >/dev/null 2>&1 &")
 		#sself.log.info("class_event: send SMS")
 		
 	def send_mail(self):
 		self.log.info("class_event: send Mail")
-		os.system('(echo "Alerte" | mail -s "Detection camera sur ' + self.cam_name + ' !" mquille.supervision@gmail.com)&')
+		os.system('(echo "Alerte" | mail -s "Detection mouvement sur ' + self.cam_name + ' !" mquille.supervision@gmail.com)&')
 		
 	def upload_file(self):
 		self.log.info("class_event: upload pictures to GoogleDrive")
@@ -185,61 +180,6 @@ if __name__ == "__main__":
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-path_alarm_local_actif = "/tmp/alarm_local_actif.txt"
-alarm_local_actif = "on"
-
-
-
-class Command(object):
-	def __init__(self, cmd):
-		self.cmd = cmd
-		self.process = None
-
-	def run(self, timeout):
-		self.out = None
-		self.err = None
-		def target():
-			self.process = subprocess.Popen(self.cmd, stdout=PIPE, stderr=PIPE, shell=True, preexec_fn=os.setsid)
-			self.out, self.err = self.process.communicate()
-			
-		thread = threading.Thread(target=target)
-		thread.start()
-
-		thread.join(timeout)
-		
-		if thread.is_alive():
-			os.killpg(self.process.pid, signal.SIGTERM)
-			thread.join()
-			
-		return self.process.returncode,self.out
-		
 def upload_files(log, src_folder_name, nbr):
 	""" 
 		Upload files in the local folder to Google Drive 
@@ -287,52 +227,3 @@ def upload_files(log, src_folder_name, nbr):
 		nb_try_uploading -= 1
 		
 	return
-
-def main():
-	""" 
-		Main
-	"""
-	
-	""" Create logger """
-	log = logger()
-	log.create()
-	log.info("")
-	log.info("")
-	log.info("********************")
-	log.info("*** Start script ***")
-	log.info("********************")
-	
-	""" Script argument """
-	if len(sys.argv) != 5:
-		log.error("Error, argument not valid")
-		sys.exit()
-
-	args = parse_args()
-	src_folder_name = args.source
-	#dst_folder_name = args.destination
-	#parent_folder_name = args.parent
-	number_event = args.number
-	
-	log.info("Arguments: ")
-	log.info("   src_folder_name: " + src_folder_name)
-	#log.info("   parent_folder_name: " + parent_folder_name)
-	#log.info("   dst_folder_name: " + dst_folder_name)
-	log.info("   number_event: " + number_event)
-	
-	# Send SMS
-	os.system("wget 'https://smsapi.free-mobile.fr/sendmsg?user=36056523&pass=Pn77qalc2rwilN&msg=Alerte%20general%20!!!'")
-	pygame.mixer.init()
-	pygame.mixer.music.load("/home/pi/supervision/music/2334.mp3")
-	pygame.mixer.music.play()	
-	# Alarm Actif
-	os.system("echo " + alarm_local_actif + " > " + path_alarm_local_actif)
-			
-	time.sleep(5)
-	pygame.mixer.music.stop()	
-	# Upload the files    
-	upload_files(log, src_folder_name, number_event)
-
-	sys.exit()
-	
-if __name__ == "__main__":
-    main()

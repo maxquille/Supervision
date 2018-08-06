@@ -272,6 +272,7 @@ class alarme(Thread):
 		self.date_end = datetime.now()
 		self.alarme_is_actif = False
 		pygame.mixer.init()
+		pygame.mixer.music.set_volume(1)
 		try:
 			pygame.mixer.music.load("/home/pi/supervision/music/2334.mp3")
 		except:
@@ -301,10 +302,10 @@ class alarme(Thread):
 		self.current_status = 'on'
 		self.alarme_is_actif = True
 		self.date_start = datetime.now()
-		self.date_end = self.date_start + + timedelta(minutes=0, seconds=45) #Timeout
+		self.date_end = self.date_start + + timedelta(minutes=0, seconds=15) #Timeout
 		# Play alarm music
 		try:
-			pygame.mixer.music.play(loops=-1, start=0.0)
+			pygame.mixer.music.play(loops=-1, start=0.0) #Infinit loop
 		except:
 			pass
 		
