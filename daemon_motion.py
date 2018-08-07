@@ -279,8 +279,8 @@ class alarme(Thread):
 			log.error("Thread alarme: Load music failed")
 		GPIO.setwarnings(False)
 		GPIO.setmode(GPIO.BOARD) ## Use board pin numbering
-		GPIO.setup(7, GPIO.OUT) ## Setup GPIO Pin 7 to OUT
-		GPIO.output(7,True) ## Turn on GPIO pin 7
+		GPIO.setup(8, GPIO.OUT) ## Setup GPIO Pin 8 to OUT
+		GPIO.output(8,True) ## Turn on GPIO pin 8
 		self.gpio_state = True
 		
 	def run(self):
@@ -330,13 +330,13 @@ class alarme(Thread):
 	def manage_gpio(self):
 		if self.alarme_is_actif == True:
 			if self.gpio_state == True:
-				GPIO.output(7,False) ## Turn off
+				GPIO.output(8,False) ## Turn off
 				self.gpio_state = False
 			else:
-				GPIO.output(7,True) ## Turn ons
+				GPIO.output(8,True) ## Turn ons
 				self.gpio_state = True
 		else:
-			GPIO.output(7,True) ## Turn on
+			GPIO.output(8,True) ## Turn on
 		
 def main():
 	

@@ -11,17 +11,148 @@
 # Ex:
 #	python supervision.py
 #
-# MQ 30/01/2018
+# MQ 06/08/2018
 #
 
-""" Import general libraries"""
-import time, sys, logging, os, ConfigParser, io
+import urllib2
+from threading import Thread
+import os, time, logging, sys, ConfigParser
 from logging.handlers import RotatingFileHandler
-from datetime import datetime
 from argparse import ArgumentParser
-from collections import defaultdict
 import socket, struct
-import netifaces as ni
+import select
+from datetime import date, datetime, timedelta
+import pygame
+import RPi.GPIO as GPIO ## Import GPIO library
+
+logger_path = "/home/pi/supervision/logs/supervision.log"
+param_file_name = "param.ini"
+path_change_detection = "/tmp/change_detection.txt"
+
+
+""" Class """
+class logger(object):
+	def __init__(self):
+		self.log = logging.getLogger(__name__) 
+	
+	def create(self):
+		""" Logger path """ 
+		self.pathlogger = logger_path
+
+		""" Logger setting """
+		self.log.setLevel(logging.DEBUG)
+		self.file_handler = RotatingFileHandler(os.path.normpath(self.pathlogger), 'a', 1000000, 1)
+		self.formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+		self.file_handler.setLevel(logging.DEBUG)
+		self.file_handler.setFormatter(self.formatter)
+		self.log.addHandler(self.file_handler)
+		self.gsteam_handler = logging.StreamHandler() # création d'un second handler qui va rediriger chaque écriture de log sur la console
+		self.gsteam_handler.setFormatter(self.formatter)
+		self.gsteam_handler.setLevel(logging.DEBUG)
+		self.log.addHandler(self.gsteam_handler)
+	
+	def info(self, string):
+		self.log.info(string)
+	
+	def warning(self, string):
+		self.log.warning(string)
+	
+	def error(self, string):
+		self.log.error(string)
+	
+	def debug(self, string):
+		self.log.debug(string)	
+
+
+class check_detection_state(Thread):
+
+	def __init__(self):
+		GPIO.setwarnings(False)
+		GPIO.setmode(GPIO.BOARD) ## Use board pin numbering
+		GPIO.setup(13, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+		self.key_state = self.read_key_state()
+		self.detection_alarme = "off"
+		open(path_change_detection , 'w').write("0")
+		
+	def read_key_state(self):
+		return int(GPIO.input(13))
+	
+	def key_state_change(self):
+		if read_key_state != self.key_state:
+			if self.detection_alarme == "off":
+				self.detection_alarme = "on"
+			else:
+				self.detection_alarme = "on"
+				
+			return
+		
+		if read_key_state != self.key_state:
+			if self.detection_alarme == "off":
+				self.detection_alarme = "on"
+			else:
+				self.detection_alarme = "on"
+				
+			return
+		
+		
+		
+	def run(self):
+		while True:
+			if key_state_change():
+			
+			""" Make payload """
+			
+			time.sleep(1)			
+def main():
+	
+	""" Create logger """
+	log = logger()
+	log.create()
+	log.info("")
+	log.info("Start script")
+	
+	exit()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+if __name__ == "__main__":
+    main()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 work_path = "/home/pi/supervision/"
 logger_path = "/home/pi/supervision/logs/supervision.log"
