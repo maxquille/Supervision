@@ -434,7 +434,6 @@ def main():
 			t_s_udp.set_alarme_active_status(current_alarme_status)
 			log.info("Alarme_active_status new state : " + current_alarme_status)
 		
-		print "boucle"
 		time.sleep(1)
 
 
