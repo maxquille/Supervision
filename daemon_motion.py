@@ -26,7 +26,7 @@ import RPi.GPIO as GPIO ## Import GPIO library
 
 logger_path = "/home/pi/supervision/logs/daemon_motion.log"
 path_motion_event = "/tmp/motion_event.txt"
-param_file_name = "param.ini"
+param_file_name = "/home/pi/supervision/param.ini"
 motion_conf_path_original = "/etc/motion/motion_original.conf"
 motion_conf_path = "/etc/motion/motion.conf"
 
@@ -271,6 +271,8 @@ class alarme(Thread):
 		self.date_start = datetime.now()
 		self.date_end = datetime.now()
 		self.alarme_is_actif = False
+		self.nb_action_relais = 6 # nombre de basculement du relais
+		self.nb_action_relais_temp = 0
 		pygame.mixer.init()
 		pygame.mixer.music.set_volume(1)
 		try:
@@ -286,7 +288,7 @@ class alarme(Thread):
 	def run(self):
 	
 		while True:
-			time.sleep(0.4)
+			time.sleep(0.1)
 			
 			#Timeout
 			if self.current_status == 'on' and datetime.now() > self.date_end and self.alarme_is_actif == True:
@@ -328,15 +330,22 @@ class alarme(Thread):
 		return self.current_status
 
 	def manage_gpio(self):
-		if self.alarme_is_actif == True:
+		if self.alarme_is_actif == True and (self.nb_action_relais_temp <= self.nb_action_relais):
 			if self.gpio_state == True:
 				GPIO.output(8,False) ## Turn off
 				self.gpio_state = False
 			else:
 				GPIO.output(8,True) ## Turn ons
 				self.gpio_state = True
+				
+			self.nb_action_relais_temp += 1
+		
+		elif self.alarme_is_actif == True and (self.nb_action_relais_temp > self.nb_action_relais):
+			GPIO.output(8,True) ## Turn on
+	
 		else:
 			GPIO.output(8,True) ## Turn on
+			self.nb_action_relais_temp = 0
 		
 def main():
 	

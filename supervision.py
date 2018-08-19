@@ -27,7 +27,7 @@ import pygame
 import RPi.GPIO as GPIO ## Import GPIO library
 
 logger_path = "/home/pi/supervision/logs/supervision.log"
-param_file_name = "param.ini"
+param_file_name = "/home/pi/supervision/param.ini"
 path_change_detection = "/tmp/state_detection.txt"
 
 """ Global def """
@@ -298,9 +298,9 @@ def main():
 		while True:
 			i += 1
 			t_send_udp.set_detection_status(t_check_detection_state.get_status())
-			if i == 15:
-				t_send_udp.set_alarme_active_status('on')
-			time.sleep(0.5)
+			#if i == 15:
+			#	t_send_udp.set_alarme_active_status('on')
+			time.sleep(0.3)
 		
 	exit()
 
