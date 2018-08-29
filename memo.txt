@@ -1,5 +1,0 @@
-git push -u origin master
-git checkout -b develop
-git merge develop
-git pull
-

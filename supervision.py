@@ -137,15 +137,25 @@ class check_detection_state(Thread):
 		else:
 			return False		
 	
+	def send_mail(self, state):
+		self.log.info("check_detection_state: send Mail alarm " + state)
+		if state == "off" and self.detection_alarme_old != '':
+			os.system('(echo "Desactivation alarme" | mail -s "Desactivation alarme !" mquille.supervision@gmail.com)&')
+		
+		elif state == "on" and self.detection_alarme_old != '':
+			os.system('(echo "Activation alarme" | mail -s "Activation alarme !" mquille.supervision@gmail.com)&')
+			
 	def new_state(self, state):
 		self.log.info("Thread check_detection_state: traitement new state " + state)
 		if (state == "on"):
 			GPIO.output(21,True) # Red Led
 			GPIO.output(23,False) # Green Led
+			#self.send_mail(state)
 			
 		elif (state == "off"):
 			GPIO.output(21,False) # Red Led
 			GPIO.output(23,True) # Green Led
+			self.send_mail(state)
 			
 	def get_status(self):
 		return self.detection_alarme
@@ -171,8 +181,9 @@ class check_detection_state(Thread):
 				self.detection_alarme = "off"
 			
 			if self.detection_alarme_old != self.detection_alarme:
-				self.detection_alarme_old = self.detection_alarme
 				self.new_state(self.detection_alarme)
+				self.detection_alarme_old = self.detection_alarme
+				
 				
 			time.sleep(0.5)		
 
