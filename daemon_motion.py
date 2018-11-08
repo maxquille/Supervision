@@ -271,8 +271,9 @@ class alarme(Thread):
 		self.date_start = datetime.now()
 		self.date_end = datetime.now()
 		self.alarme_is_actif = False
-		self.nb_action_relais = 6 # nombre de basculement du relais
-		self.nb_action_relais_temp = 0
+		self.temps_flash_ON_ms = 10000 # temps éclairage du flash en ms
+		self.temps_flash_ON_ms = self.temps_flash_ON_ms * 0.01
+		self.temps_flash_ON_ms_temp = 0
 		pygame.mixer.init()
 		pygame.mixer.music.set_volume(1)
 		try:
@@ -292,8 +293,7 @@ class alarme(Thread):
 			
 			#Timeout
 			if self.current_status == 'on' and datetime.now() > self.date_end and self.alarme_is_actif == True:
-				self.alarme_is_actif = False
-				pygame.mixer.music.stop()
+				self.clear()
 				self.log.info('Thread alarme: Stop alarme after timeout.')
 			
 			self.manage_gpio()
@@ -304,7 +304,7 @@ class alarme(Thread):
 		self.current_status = 'on'
 		self.alarme_is_actif = True
 		self.date_start = datetime.now()
-		self.date_end = self.date_start + + timedelta(minutes=0, seconds=15) #Timeout
+		self.date_end = self.date_start + timedelta(minutes=0, seconds=30) #Timeout
 		# Play alarm music
 		try:
 			pygame.mixer.music.play(loops=-1, start=0.0) #Infinit loop
@@ -330,22 +330,38 @@ class alarme(Thread):
 		return self.current_status
 
 	def manage_gpio(self):
-		if self.alarme_is_actif == True and (self.nb_action_relais_temp <= self.nb_action_relais):
-			if self.gpio_state == True:
-				GPIO.output(8,False) ## Turn off
-				self.gpio_state = False
-			else:
-				GPIO.output(8,True) ## Turn ons
-				self.gpio_state = True
-				
-			self.nb_action_relais_temp += 1
 		
-		elif self.alarme_is_actif == True and (self.nb_action_relais_temp > self.nb_action_relais):
+		if self.alarme_is_actif == True and (self.temps_flash_ON_ms_temp <= self.temps_flash_ON_ms):
+			
+			if self.temps_flash_ON_ms_temp == 0 :
+				self.log.info('Thread alarme: Start Flash=ON')
+				
+			#if self.gpio_state == True:
+			GPIO.output(8,False) ## Turn off
+			self.gpio_state = False
+
+			# else:
+				# GPIO.output(8,True) ## Turn on
+				# self.gpio_state = True
+				# self.log.info("gpio on")
+			
+			self.temps_flash_ON_ms_temp += 1
+		
+		elif self.alarme_is_actif == True and (self.temps_flash_ON_ms_temp > self.temps_flash_ON_ms):
+		
+			if self.gpio_state == False :
+				self.log.info('Thread alarme: End Flash=OFF')
+				
 			GPIO.output(8,True) ## Turn on
+			self.gpio_state = True
 	
 		else:
+			if self.gpio_state == False :
+				self.log.info('Thread alarme: End Flash=OFF')
+				
 			GPIO.output(8,True) ## Turn on
-			self.nb_action_relais_temp = 0
+			self.gpio_state = True
+			self.temps_flash_ON_ms_temp = 0
 		
 def main():
 	
@@ -418,7 +434,6 @@ def main():
 		
 		""" Manage alarme status """
 		current_alarme_status = t_alarme.get_status()
-		
 		if t_r_udp.get_alarme_active_cmd() == 'off' and t_motion.get_on_event_detection() == 'off' and current_alarme_status == 'on':
 			t_alarme.clear()
 			current_alarme_status = 'off'

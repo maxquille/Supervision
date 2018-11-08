@@ -159,7 +159,7 @@ def main():
 	event = class_event(log, name_came, picture_storage, event_number)
 	
 	# Set alarme
-	os.system('(sleep 1 && echo "on" > ' + path_motion_event + ')&')
+	os.system('(sleep 4 && echo "on" > ' + path_motion_event + ')&')
 
 	# Send SMS
 	event.send_sms()
