@@ -122,7 +122,10 @@ class check_detection_state(Thread):
 		self.key_state = self.read_key_state()
 		self.detection_alarme_old = '';
 		self.detection_alarme = "off" 					# Init à off (modifier les 2 lignes)
-		open(path_change_detection , 'w').write("0") 	# Init à off (modifier les 2 lignes)
+		try:
+			with open(path_change_detection): pass
+		except IOError:
+			open(path_change_detection , 'w').write("0") 	# Init à off (modifier les 2 lignes)
 		self.log.info("Thread check_detection_state: Start thread")
 		
 	def read_key_state(self):
