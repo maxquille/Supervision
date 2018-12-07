@@ -29,13 +29,17 @@ def main():
 	"""
 
 	""" Global variables """
-
+	
+	ping_failed = 0
 	while True:
 		try:
 			r = pyping.ping("172.27.224.1")
 			
 			print int(r.ret_code)
 			if int(r.ret_code) != 0:
+				ping_failed += 1
+		
+			if ping_failed == 8:
 				while int(r.ret_code) != 0:
 					# wait openVpn become 
 					os.system("service openvpn restart")
@@ -44,6 +48,7 @@ def main():
 					print int(r.ret_code) 
 				
 				restart_service()
+				ping_failed = 0
 				
 		except:
 			pass
