@@ -85,7 +85,7 @@ class class_event(object):
 	def upload_file(self):
 		self.log.info("class_event: upload pictures to GoogleDrive")
 			
-		command = Command("sudo /usr/local/bin/drive push -no-prompt -ignore-checksum -fix-clashes -ignore-conflict "+ self.picture_storage)
+		command = Command("sudo /usr/local/bin/drive push -no-prompt -ignore-checksum -fix-clashes -ignore-conflict  -ignore-name-clashes "+ self.picture_storage)
 
 		rtr_code, out = command.run(timeout=120)
 		self.log.info("Result command return code (1/2): '" + str(rtr_code) + "'")
